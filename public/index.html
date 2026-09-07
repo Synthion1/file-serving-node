@@ -1,12 +1,53 @@
 <!DOCTYPE html>
-<link rel="stylesheet" href="style.css">
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Node.js File Server</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Welcome to the Node.js File Server</h1>
+
+    <!-- Section 3: File Upload Feature -->
+    <h2>Upload a File</h2>
+
+    <!-- enctype="multipart/form-data" is required for file uploads to work correctly -->
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="file" id="fileInput" required>
+        <button type="submit">Upload</button>
+    </form>
+
+    <!-- This paragraph will show success/error messages after upload -->
+    <p id="statusMsg"></p>
+
+    <script>
+        // Listen for form submission instead of letting the browser reload the page
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // stop the default page-reload behavior
+
+            const fileInput = document.getElementById('fileInput');
+            const statusMsg = document.getElementById('statusMsg');
+
+            // FormData automatically packages the file in multipart/form-data format
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            statusMsg.textContent = 'Uploading...'; // give the user immediate feedback
+
+            try {
+                // Send the file to our server's /upload route
+                const res = await fetch('/upload', { method: 'POST', body: formData });
+                const text = await res.text(); // server responds with a plain text message
+
+                statusMsg.textContent = text;
+                statusMsg.style.color = res.ok ? 'green' : 'red'; // green = success, red = error
+            } catch (err) {
+                // Handles network errors (e.g. server is down)
+                statusMsg.textContent = 'Upload failed: ' + err.message;
+                statusMsg.style.color = 'red';
+            }
+        });
+    </script>
 </body>
 </html>
